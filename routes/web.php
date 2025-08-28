@@ -8,60 +8,43 @@ use App\Http\Controllers\KelasController;
 use App\Http\Controllers\mapelController;
 use App\Http\Controllers\jurusanController;
 use App\Http\Controllers\UsersController;
+use App\Http\Controllers\Auth\LoginController;
 
-Route::get('/template', function () {
-    return view('index');
+// Rute untuk menampilkan halaman login (di rute utama '/')
+Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
+
+// Rute untuk menangani proses login
+Route::post('/login', [LoginController::class, 'login'])->name('login.post');
+
+// Rute yang dilindungi oleh middleware 'auth' (hanya bisa diakses setelah login)
+Route::middleware('auth')->group(function () {
+    // Halaman dashboard yang Anda inginkan
+    Route::get('/dashboard', function () {
+        return view('layout.sourcelayout');
+    })->name('dashboard');
+
+    Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+    Route::get('dataguru',function(){
+        return view('guru.dataguru');
+    });
+
+    Route::get('/guru', [GuruController::class, 'index']);
+    Route::get('/siswa', [SiswaController::class, 'index']);
+    Route::get('/kelas', [KelasController::class, 'index']);
+    Route::get('/mapel', [mapelController::class, 'index']);
+    Route::get('/jurusan', [jurusanController::class, 'index']);
+
+    Route::prefix('admin')->group(function () {
+        Route::get('/users', [SuperadminController::class, 'users']);
+    });
+
+    Route::prefix('users')->group(function () {
+        Route::get('/index', [UsersController::class, 'index']);
+        Route::get('/create', [UsersController::class, 'create']);
+    });
+
+    Route::get('/datasiswa', [SiswaController::class, 'index']);
+
+    Route::resource('siswa', SiswaController::class);
 });
-
-Route::get('/', function () {
-    return view('layout.sourcelayout');
-});
-
-Route::get('dataguru',function(){
-    return view('guru.dataguru');
-});
-
-// Route::get('datasiswa',function(){
-//     return view('Data.datasiswa');
-// });
-
-// Route::get('datakelas',function(){
-//     return view('Data.datakelas');
-// });
-
-// Route::get('datajurusan',function(){
-//     return view('Data.datajurusan');
-// });
-
-// Route::get('datamapel',function(){
-//     return view('Data.datamapel');
-// });
-
-// Route::get('mengajar',function(){
-//     return view('Data.mengajar');
-// });
-
-// Route::get('/user/{id}', function ($id) {
-//     return "NAMA GW DZIKRI: " . $id;
-// });
-
-Route::get('/guru', [GuruController::class, 'index']);
-Route::get('/siswa', [SiswaController::class, 'index']);
-Route::get('/kelas', [KelasController::class, 'index']);
-Route::get('/mapel', [mapelController::class, 'index']);
-Route::get('/jurusan', [jurusanController::class, 'index']);
-
-
-Route::prefix('admin')->group(function () {
-    Route::get('/dashboard', [SuperadminController::class, 'index']);
-    Route::get('/users', [SuperadminController::class, 'users']);
-});
-
-Route::prefix('users')->group(function () {
-    Route::get('/index', [UsersController::class, 'index']);
-    Route::get('/create', [UsersController::class, 'create']);
-});
-
-Route::get('/datasiswa', [SiswaController::class, 'index']);
-
-Route::resource('siswa', SiswaController::class);
